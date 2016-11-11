@@ -16,6 +16,6 @@ import org.parallelme.userlibrary.datatype.UserData;
  * @author Wilson de Carvalho
  */
 @SuppressWarnings("rawtypes")
-public interface Reduce<E extends UserData> {
+public interface Reduce<E> {
 	E function(E element1, E element2);
 }

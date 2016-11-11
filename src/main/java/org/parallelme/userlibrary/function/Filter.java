@@ -16,6 +16,6 @@ import org.parallelme.userlibrary.datatype.UserData;
  * @author Wilson de Carvalho
  */
 @SuppressWarnings("rawtypes")
-public interface Filter<E extends UserData> {
+public interface Filter<E> {
 	boolean function(E element);
 }

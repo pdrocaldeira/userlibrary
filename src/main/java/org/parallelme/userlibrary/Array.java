@@ -24,7 +24,7 @@ import org.parallelme.userlibrary.parallel.ParallelOperation;
  * @author Wilson de Carvalho
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Array<E extends UserData> extends CollectionLike<E> {
+public class Array<E extends UserData> extends CollectionLike<E> { //TODO: Create another class that don't receive UserData. Instead it can receive anything
 	private Object array;
 	private final Class<E> typeParameterClass;
 
@@ -39,6 +39,12 @@ public class Array<E extends UserData> extends CollectionLike<E> {
 	 */
 	public Array(Object array, Class<E> typeParameterClass) {
 		this.array = array;
+		
+		for (int i = 0; i < java.lang.reflect.Array.getLength(array); i++){
+			
+		}
+		
+		
 		this.typeParameterClass = typeParameterClass;
 	}
 
@@ -72,17 +78,16 @@ public class Array<E extends UserData> extends CollectionLike<E> {
 		return new ParallelOperation<E>();
 	}
 
-	/**
+	/**element
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void foreach(Foreach<E> userFunction) {
 		try {
 			E element = typeParameterClass.newInstance();
-			for (int i = 0; i < java.lang.reflect.Array.getLength(array); i++) {
-				element.setValue(java.lang.reflect.Array.get(array, i));
-				userFunction.function(element);
-				java.lang.reflect.Array.set(array, i, element.getValue());
+			for (int i = 0; i < java.lang.reflect.Array.getLength(array); i++) {				
+				element = userFunction.function( (E) java.lang.reflect.Array.get(array, i));
+				java.lang.reflect.Array.set(array, i, element);
 			}
 		} catch (InstantiationException e) {
 			throw new RuntimeException(e);
@@ -117,6 +122,43 @@ public class Array<E extends UserData> extends CollectionLike<E> {
 		}
 	}
 
+	public <R extends UserData> Array<R> splitMap(Class<R> classR, int slice_size, Reduce<E> userFunction){		
+		int length = java.lang.reflect.Array.getLength(this.array)/slice_size;
+		R foo;
+		try {
+			foo = classR.newInstance();
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+		
+		Object retArray = java.lang.reflect.Array.newInstance(
+				foo.getValueClass(), length);
+		for(int i = 0; i < length ; i++){
+			Array currentSubArray = this.subArray(classR, i*slice_size, slice_size);
+			UserData retReduce = currentSubArray.reduce(userFunction);
+			java.lang.reflect.Array.set(retArray, i, retReduce.getValue());
+		}
+		return new Array<R>(retArray, classR);		
+	}
+	
+	private <R extends UserData> Array<R> subArray(Class<R> classR, int begin, int size){
+		try {
+			R foo = classR.newInstance();
+			Object subarray = java.lang.reflect.Array.newInstance(foo.getValueClass(), size);
+			for(int i = 0; i < size; i++){ //Possible overflow here
+				java.lang.reflect.Array.set(subarray, i, java.lang.reflect.Array.get(this.array, begin+i));
+			}
+			return new Array(subarray, this.typeParameterClass);
+		} catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}		
+	}
+	
+	
 	/**
 	 * {@inheritDoc}
 	 */

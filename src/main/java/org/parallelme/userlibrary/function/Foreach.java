@@ -17,6 +17,6 @@ import org.parallelme.userlibrary.datatype.UserData;
  * @author Wilson de Carvalho
  */
 @SuppressWarnings("rawtypes")
-public interface Foreach<E extends UserData> {
-	void function(E element);
+public interface Foreach<E> {
+	E function(E element);
 }

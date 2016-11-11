@@ -16,6 +16,6 @@ import org.parallelme.userlibrary.datatype.UserData;
  * @author Wilson de Carvalho
  */
 @SuppressWarnings("rawtypes")
-public interface Map<R extends UserData, E extends UserData> {
+public interface Map<R, E> {
 	R function(E element);
 }
